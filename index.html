@@ -1,12 +1,92 @@
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta http-equiv="X-UA-Compatible" content="ie=edge">
-        <title>Document</title>
-    </head>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+    <title>Home</title>
+</head>
     <body>
-        
+        <div id="app">
+            <div class="row">
+                <div v-for="post in posts" class="col-lg-3 col-md-4 col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <img :src="post.jetpack_featured_media_url" class="card-img-top" alt="...">
+                            <h5 class="card-title"> {{ post.title.rendered }} </h5>
+                            <a :href="post.link" class="btn btn-primary ">En savoir plus</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </body>
-    </html>
+</html>
+
+
+<script>
+    var sourceLink = 'https://webandsun.com/wp-json/wp/v2/posts';
+
+    window.onload = function () {
+        var posts = new Vue({
+
+            el: '#app',
+
+            data: {
+                posts: []
+            },
+
+            created: function () {
+                this.fetchData()
+            },
+
+
+            methods: {
+                fetchData: function () {
+                    var request = new XMLHttpRequest();
+                    var objetJs = this;
+                    var titles = [];
+
+                    request.open('GET', sourceLink);
+                    request.onload = function () {
+
+                        objetJs.posts = JSON.parse(request.responseText);
+
+                        objetJs.posts = objetJs.posts.map(p => { p.title.rendered = decodeEntities(p.title.rendered);
+                        return  p});
+
+                    };
+                    request.send()
+                }
+            }
+        })
+    };
+
+
+    var decodeEntities = (function() {
+        // this prevents any overhead from creating the object each time
+        var element = document.createElement('div');
+
+        function decodeHTMLEntities (str) {
+            if(str && typeof str === 'string') {
+                // strip script/html tags
+                str = str.replace(/<script[^>]*>([\S\s]*?)<\/script>/gmi, '');
+                str = str.replace(/<\/?\w(?:[^"'>]|"[^"]*"|'[^']*')*>/gmi, '');
+                element.innerHTML = str;
+                str = element.textContent;
+                element.textContent = '';
+            }
+
+            return str;
+        }
+
+        return decodeHTMLEntities;
+    })();
+
+</script>
+
+
+
+
+
